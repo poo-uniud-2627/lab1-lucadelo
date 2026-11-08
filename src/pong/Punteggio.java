@@ -29,62 +29,66 @@ public class Punteggio {
 
     /**
      * Una partita nuova, 0 a 0, con la sua regola per vincere.
-     * Pretende: puntiPerVincere è almeno 1; scartoMinimo è almeno 1.
+     * Pretende: niente
      * Promette: una partita 0 a 0, non finita, senza vincitore e con la storia vuota.
+     * 
+     * Lancia `IllegalArgumentException` se `puntiPerVincere` è minore di 1 o `scartoMinimo` è minore di 1.
      */
     public Punteggio(int puntiPerVincere, int scartoMinimo) {
+        if(puntiPerVincere < 1)
+            throw new IllegalArgumentException("puntiPerVincere deve essere almeno 1");
+        
+        if(scartoMinimo < 1)
+            throw new IllegalArgumentException("scartoMinimo deve essere almeno 1");
 
-        if(puntiPerVincere > 0 && scartoMinimo > 0){
-            this.puntiDestra = 0;
-            this.puntiSinistra = 0;
-            this.puntiPerVincere = puntiPerVincere;
-            this.scartoPerVincere = scartoMinimo;
-            this.storico = new ArrayList<>();
-        }
+        this.puntiDestra = 0;
+        this.puntiSinistra = 0;
+        this.puntiPerVincere = puntiPerVincere;
+        this.scartoPerVincere = scartoMinimo;
+        this.storico = new ArrayList<>();
     }
 
     /**
      * Il lato chi ha fatto un punto.
-     * Pretende: chi non è null.
+     * Pretende: niente
      * Promette: se la partita non era finita, il lato chi ha un punto in più, l'altro lato non
      *           cambia e il punto si aggiunge in fondo alla storia; se con questo punto il lato chi
      *           vince (regola in cima alla classe), la partita è finita e il vincitore è chi.
      *           Se la partita era già finita, non cambia niente.
+     * 
+     * Se `chi` è null lancia `IllegalArgumentException`, anche a partita finita, e non cambia niente.
      */
     public void segnaPunto(Lato chi) {
-
-        if(chi != null){
-
-            if(isFinita() != true){
-
-                if(chi == Lato.DESTRA){
-                    puntiDestra ++;
-                    storico.add(Lato.DESTRA);
-
-                } else if(chi == Lato.SINISTRA){
-                    puntiSinistra ++;
-                    storico.add(Lato.SINISTRA);
-
-                }
+        if(chi == null)
+            throw new IllegalArgumentException("chi deve essere diverso da null");
+        
+        if(isFinita() != true){
+            if(chi == Lato.DESTRA){
+                puntiDestra ++;
+                storico.add(Lato.DESTRA);
+            } else if(chi == Lato.SINISTRA){
+                puntiSinistra ++;
+                storico.add(Lato.SINISTRA);
             }
         }
+        
     }
 
     /**
-     * Pretende: chi non è null.
+     * Pretende: niente
      * Promette: i punti del lato chi. Non cambia niente.
+     * 
+     * Lancia `IllegalArgumentException` se `chi` è null.
      */
     public int getPunti(Lato chi) {
+        if(chi == null)
+            throw new IllegalArgumentException("chi deve essere diverso da null!");
 
-        if(chi != null){
-
-            if(chi == Lato.DESTRA){
-                return puntiDestra;
-
-            } else if(chi == Lato.SINISTRA){
-                return puntiSinistra;
-            }
-        } 
+        if(chi == Lato.DESTRA)
+            return puntiDestra;
+        else if(chi == Lato.SINISTRA)
+            return puntiSinistra;
+     
         return 0;
     }
 
@@ -190,5 +194,63 @@ public class Punteggio {
         this.puntiDestra = 0;
         this.puntiSinistra = 0;
         this.storico = new ArrayList<>();
+    }
+
+    private boolean haNullInStorico() {
+        for (Lato l : storico) {
+            if (l == null) 
+                return true;
+        }
+        return false;
+    }
+
+    private int puntiDaStorico(Lato chi){
+        int puntiContati = 0;
+        for(Lato l: storico){
+            if(l == chi)
+                puntiContati++;
+        }
+        return puntiContati;
+    }
+
+    // controlla se ci sono punti dopo quello che ha chiso la partita
+    boolean nessunPuntoInEcceso(){
+        
+        int puntiSinistraContati = 0;
+        int puntiDestraContati = 0;
+        
+        boolean isFinitaStorico = false;        
+        for(Lato l : storico){
+            isFinitaStorico = (puntiSinistraContati >= puntiPerVincere || puntiDestraContati >= puntiPerVincere) 
+                                && Math.abs(puntiSinistraContati-puntiDestraContati) >= scartoPerVincere;
+
+            if(isFinitaStorico)
+                return false;
+            if(l == Lato.SINISTRA)
+                puntiSinistraContati++;
+            if(l == Lato.DESTRA)
+                puntiDestraContati++;
+        }
+        return true;
+    }
+    
+    boolean repOK() {
+        return (
+            puntiPerVincere >= 1 && scartoPerVincere >= 1 && storico != null
+            && puntiDestra >= 0 && puntiSinistra >= 0
+            && !haNullInStorico()
+            && puntiDestra == puntiDaStorico(Lato.DESTRA) && puntiSinistra == puntiDaStorico(Lato.SINISTRA)
+            && isFinita() == (getVincitore() != null)
+            && (getVincitore() == null || (getPunti(getVincitore()) >= puntiPerVincere && getScartoAttuale() >= scartoPerVincere)) 
+            && nessunPuntoInEcceso()
+
+           
+
+            /*&& puntiDestra >= 0 && puntiDestra <= puntiPerVincere
+            && puntiSinistra >= 0 && puntiSinistra <= puntiPerVincere
+            && !(puntiDestra == puntiPerVincere && puntiSinistra == puntiPerVincere)
+            && (isFinita() == false && ((puntiDestra >= 0 && puntiDestra <= puntiPerVincere) || ( puntiSinistra >= 0 && puntiSinistra <= puntiPerVincere)))
+            && puntiDestra == 0  && puntiSinistra == 0 && storico.isEmpty()*/
+        );
     }
 }
