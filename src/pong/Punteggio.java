@@ -213,9 +213,8 @@ public class Punteggio {
         return puntiContati;
     }
 
-    // controlla se ci sono punti dopo quello che ha chiso la partita
+    // controlla se ci sono punti dopo quello che ha chiuso la partita
     boolean nessunPuntoInEcceso(){
-        
         int puntiSinistraContati = 0;
         int puntiDestraContati = 0;
         
@@ -223,7 +222,7 @@ public class Punteggio {
         for(Lato l : storico){
             isFinitaStorico = (puntiSinistraContati >= puntiPerVincere || puntiDestraContati >= puntiPerVincere) 
                                 && Math.abs(puntiSinistraContati-puntiDestraContati) >= scartoPerVincere;
-
+                                
             if(isFinitaStorico)
                 return false;
             if(l == Lato.SINISTRA)
@@ -243,14 +242,6 @@ public class Punteggio {
             && isFinita() == (getVincitore() != null)
             && (getVincitore() == null || (getPunti(getVincitore()) >= puntiPerVincere && getScartoAttuale() >= scartoPerVincere)) 
             && nessunPuntoInEcceso()
-
-           
-
-            /*&& puntiDestra >= 0 && puntiDestra <= puntiPerVincere
-            && puntiSinistra >= 0 && puntiSinistra <= puntiPerVincere
-            && !(puntiDestra == puntiPerVincere && puntiSinistra == puntiPerVincere)
-            && (isFinita() == false && ((puntiDestra >= 0 && puntiDestra <= puntiPerVincere) || ( puntiSinistra >= 0 && puntiSinistra <= puntiPerVincere)))
-            && puntiDestra == 0  && puntiSinistra == 0 && storico.isEmpty()*/
         );
     }
 }
